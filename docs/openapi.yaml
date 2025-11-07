@@ -1,0 +1,382 @@
+openapi: 3.0.0
+
+info:
+  version: "0.0.2"
+  title: aeriOS Federator
+  contact:
+    email: info@aerios-project.eu
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+  - description: aeriOS Domain
+    url: "{protocol}://{hostname}:{port}"
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+      hostname:
+        default: localhost
+      port:
+        default: "8050"
+
+tags:
+  - name: Common
+  - name: Federator API
+    description: REST API to manage aeriOS Domain Federation
+
+paths:
+  /version:
+    get:
+      tags:
+        - Common
+      summary: Returns the API version
+      operationId: version
+      description: |
+        Returns the API version
+      responses:
+        "200":
+          description: API version
+  /health:
+    get:
+      tags:
+        - Common
+      summary: Returns the health status
+      operationId: health
+      description: |
+        Returns the health status of the Federator and of the domain federation
+      responses:
+        "200":
+          description: Healthy status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FederatorHealth"
+        "500":
+          description: Unhealthy status
+
+  /v1/domains:
+    get:
+      tags:
+        - Federator API
+      summary: Retrieves all the federated domains of the continuum
+      operationId: getDomains
+      description: Retrieves all the domain entities from all the federated Context Brokers of the aeriOS continuum
+      responses:
+        "200":
+          description: List of federated domains
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Domain"
+        "500":
+          description: Internal error
+    post:
+      tags:
+        - Federator API
+      summary: Handles the notification of a new domain
+      operationId: newDomain
+      description: |
+        Handles the notification from another Federator that a new domain has been created and added to the continuum
+      parameters:
+        - name: spread
+          in: query
+          description: Spreads the new domain creation across the continuum
+          required: true
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: ServiceComponent K8s Custom Resource
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewDomainNotification"
+      responses:
+        "201":
+          description: Domain registered
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/NewDomainSpreadingResponse"
+                  - $ref: "#/components/schemas/NewDomainResponse"
+        "207":
+          description: Domain registered but the process failed in some domains
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/NewDomainSpreadingResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "409":
+          description: Domain already registered in the Context Broker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /v1/domains/local:
+    get:
+      tags:
+        - Federator API
+      summary: Retrieves the local domain
+      operationId: getLocalDomain
+      description: Retrieves the local domain NGSI-LD entity from the local Context Broker of the aeriOS domain
+      responses:
+        "200":
+          description: Local domain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Domain"
+        "500":
+          description: Internal error
+    delete:
+      tags:
+        - Federator API
+      summary: Handles the notification of a domain removal
+      operationId: deleteLocalDomain
+      description: Spreads the deletion of the local domain across the continuum
+      responses:
+        "200":
+          description: Domain removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteLocalDomainResponse"
+        "207":
+          description: Domain removed but the process failed in some domains
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/DeleteLocalDomainResponse"
+        "400":
+          description: Domain has been previously removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error removing the local domain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  "/v1/domains/{domainName}":
+    delete:
+      tags:
+        - Federator API
+      summary: Handles the notification of a domain removal
+      operationId: deleteDomain
+      description: Handles the notification from another Federator that a domain has been removed from the continuum
+      parameters:
+        - name: domainName
+          in: path
+          description: Name of the domain
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Domain removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: Domain not registered in the Context Broker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error deleting CSRs in the Context Broker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    
+  "/v1/domains/{domainName}/spread":
+    delete:
+      tags:
+        - Federator API
+      summary: (Only enabled in the Entrypoint Domain) Starts the spreading process of a domain removal
+      operationId: spreadDomainDeletion
+      description: Starts the spreading process to notify all the Federators of the continuum about a domain removal
+      parameters:
+        - name: domainName
+          in: path
+          description: Name of the domain
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Domain removed
+        "404":
+          description: Domain not registered
+        "500":
+          description: Error deleting CSRs in the Context Broker
+    
+components:
+  schemas:
+    FederatorHealth:
+      description: "Desciption of the health status of the Federator"
+      type: object
+      properties:
+        status:
+          type: string
+          example: HEALTHY
+        orionLdStatus:
+          type: string
+          example: HEALTHY
+        domain:
+          type: string
+          example: CloudFerro
+        domainStatus:
+          type: string
+          example: Functional
+        peerFederatorDomain:
+          type: string
+          example: UPV
+        peerFederatorStatus:
+          type: string
+          example: HEALTHY
+        isEntrypoint:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "The peer federator is unhealty"
+        detailedErrorMessage:
+          type: string
+          example: "Get \"http://localhost:8050/health\": dial tcp [::1]:8050: connectex"
+        federatedDomains:
+          $ref: "#/components/schemas/FederatorHealthFederatedDomains"
+    FederatorHealthFederatedDomains:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 3
+        names:
+          type: string
+          example: Domain1, Domain2, Domain3
+    Domain:
+      description: "NGSI-LD entity of type Domain with simplified format"
+      type: object
+      properties:
+        id:
+          type: string
+          example: urn:ngsi-ld:Domain:CloudFerro
+        type:
+          type: string
+          example: Domain
+        description:
+          type: string
+          example: CloudFerro domain
+        publicUrl:
+          type: string
+          example: https://cloudferro-domain.aerios-project.eu
+        owner:
+          type: string
+          example: urn:ngsi-ld:Organization:CloudFerro
+        domainStatus:
+          type: string
+          example: urn:ngsi-ld:DomainStatus:Functional
+        isEntrypoint:
+          type: string
+          example: false
+        federatorUrl:
+          type: string
+          example: https://cloudferro-domain.aerios-project.eu/federator
+        publicKey:
+          type: string
+          example: qvZsatwi1NnKKoq7vAdHhwah2TNqaSxcoIICh8vZsRs=
+    NewDomainNotification:
+      description: "Notification of a new domain creation"
+      type: object
+      properties:
+        name:
+          type: string
+          example: CloudFerro
+        publicUrl:
+          type: string
+          example: https://cloudferro-domain.aerios-project.eu
+        isEntrypoint:
+          type: string
+          example: false
+        brokerId:
+          type: string
+          example: CloudFerro
+    NewDomainSpreadingResponse:
+      description: "Result of the domain registration"
+      type: object
+      properties:
+        newRegistrations:
+          type: string
+          example: llo.aerios-project.eu/v1alpha1
+        domains:
+          type: array
+          items:
+            $ref: "#/components/schemas/Domain"
+        newDomainRegistrations:
+          type: array
+          items:
+            type: object
+            example: Array of NGSI-LD Context Source Registrations
+        failedDomains:
+          type: array
+          items:
+            type: string
+            example: UPV, Edge
+        message:
+          type: string
+          example: Spreading operation completed
+    NewDomainResponse:
+      description: "Result of the domain registration"
+      type: object
+      properties:
+        newRegistrations:
+          items:
+            type: object
+            example: Array of NGSI-LD Context Source Registrations
+        message:
+          type: string
+          example: Spreading operation completed
+    ErrorMessage:
+      description: "Error message"
+      type: object
+      properties:
+        message:
+          type: string
+          example: Cannot retrieve continuum domains
+    DeleteLocalDomainResponse:
+      description: "Result of the local domain removal"
+      type: object
+      properties:
+        failedDomains:
+          items:
+            type: string
+            example: Domain1, Domain2
+        message:
+          type: string
+          example: Local domain successfully deleted
