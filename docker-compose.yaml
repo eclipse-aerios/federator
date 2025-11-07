@@ -1,0 +1,26 @@
+services:
+  federator:
+    container_name: federator
+    image: <aerios-container-registry>/federator:1.1.0
+    ports:
+      - 8050:8050
+    environment:
+      - APP_ENV=production
+      - APP_PORT=8050
+      - IS_ENTRYPOINT=false
+      - DOMAIN_NAME=Domain01
+      - DOMAIN_DESCRIPTION=This is a new domain
+      - DOMAIN_PUBLIC_URL=https://domain.aerios-project.eu
+      - DOMAIN_OWNER=UPV
+      - DOMAIN_CB_URL=http://192.168.1.202:1026
+      - DOMAIN_CB_HEALTH_URL=192.168.1.202:1036
+      # - DOMAIN_FEDERATOR_URL=http://localhost:8050
+      - PEER_FEDERATOR_URL=http://192.168.1.203:8050
+      - CB_HEALTH_CHECK_MODE=endpoint
+      - TLS_CERTIFICATE_VALIDATION=false
+      # - AERIOS_SHIM_URL=http://192.168.1.202:30633
+      - CB_TOKEN_MODE=keycloak
+      - CB_OAUTH_CLIENT_ID=ContextBroker
+      - CB_OAUTH_CLIENT_SECRET=xxx
+      - KEYCLOAK_URL=https://keycloak.mvp-domain.aerios-project.eu
+      - KEYCLOAK_REALM=keycloack-openldap

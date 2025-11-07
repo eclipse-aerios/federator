@@ -32,7 +32,7 @@ The aeriOS Federator must be configured through the use of a set of environment 
 - **CB_HEALTH_CHECK_MODE**: mode of the health checks (*endpoint* or *socket*). *Endpoint* means that a HTTP request is sent to the */version* endpoint of Orion, while *socket* means that a TCP connection is opened.
 - **TLS_CERTIFICATE_VALIDATION**: boolean value to skip certificate validation in requests to HTTPS endpoints.
 - **CB_TOKEN_MODE**: mode of the CB authorization token retrieval. In order to retrieve this token, it can be used the aerios-k8s-shim (*shim*) or Keycloak (*keycloak*).
-- **AEROS_SHIM_URL**: (only needed if **CB_TOKEN_MODE=shim**) URL of the *aerios-k8s-shim* API.
+- **AERIOS_SHIM_URL**: (only needed if **CB_TOKEN_MODE=shim**) URL of the *aerios-k8s-shim* API.
 - **CB_OAUTH_CLIENT_ID**: (only needed if **CB_TOKEN_MODE=keycloak**) CLIENT ID of the ContextBroker OAuth client in Keycloak.
 - **CB_OAUTH_CLIENT_SECRET**: (only needed if **CB_TOKEN_MODE=keycloak**) CLIENT SECRET of the ContextBroker OAuth client in Keycloak.
 - **KEYCLOAK_URL**: URL of the continuum's Keycloak instance.
