@@ -1,4 +1,7 @@
 # aeriOS Federator
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/eclipse-aerios/federator)](https://goreportcard.com/report/github.com/eclipse-aerios/federator)
+
 The aeriOS Federator serves as a management service responsible for controlling the establishment and maintenance of federation mechanisms among the multiple aeriOS domains that form the Cloud-Edge-IoT continuum. This component is intended to provide an additional layer of automatization above a NGSI-LD Context Broker (e.g. Orion-LD) to avoid direct interaction with the context brokers of the continuum when it comes to federation management, as well as federated backup mechanisms for federation critical data (e.g. domains registry).
 
 Developed using Golang 1.22 and Gingonic v1.10.0.
@@ -86,17 +89,17 @@ go run main.go
 The aeriOS Federator has been developed using Golang, so it can be packaged as a binary executable, which is ready to be run in the same OS in which the *go build* command has been executed:
 
 ```bash
-go build -ldflags "-X github.com/eclipse-aerios/federator/federator/controllers.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X github.com/eclipse-aerios/federator/federator/controllers.commitHash=$(git rev-parse HEAD)"
+go build -ldflags "-X github.com/eclipse-aerios/federator/controllers.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X github.com/eclipse-aerios/federator/controllers.commitHash=$(git rev-parse HEAD)"
 ```
 
 Golang has the advantage that applications can be easily packaged for different OS and CPU architecrtues (the complete list can be obtained by running `go tool dist list`), so in Linux you can run this command to compile the federator for different platforms:
 
 ```bash
-env GOOS=<target-OS> GOARCH=<target-architecture> go build -ldflags "-X github.com/eclipse-aerios/federator/federator/controllers.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X github.com/eclipse-aerios/federator/federator/controllers.commitHash=$(git rev-parse HEAD)"
+env GOOS=<target-OS> GOARCH=<target-architecture> go build -ldflags "-X github.com/eclipse-aerios/federator/controllers.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X github.com/eclipse-aerios/federator/controllers.commitHash=$(git rev-parse HEAD)"
 ```
 
 For instance, in case of Linux running on a ARM64 machine:
 
 ```bash
-env GOOS=linux GOARCH=arm64 go build -ldflags "-X github.com/eclipse-aerios/federator/federator/controllers.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X github.com/eclipse-aerios/federator/federator/controllers.commitHash=$(git rev-parse HEAD)"
+env GOOS=linux GOARCH=arm64 go build -ldflags "-X github.com/eclipse-aerios/federator/controllers.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X github.com/eclipse-aerios/federator/controllers.commitHash=$(git rev-parse HEAD)"
 ```
