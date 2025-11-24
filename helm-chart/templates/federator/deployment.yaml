@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "federator.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "federator.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.federator.autoscaling.enabled }}
+  replicas: {{ .Values.federator.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "federator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "federator.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.federator.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.chartNodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .Values.chartNodeSelector }}
+        {{- with .Values.federator.nodeSelector }}
+      nodeSelector:
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.federator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.federator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.federator.podSecurityContext | nindent 8 }}
+      containers:
+        - name: federator
+          securityContext:
+            {{- toYaml .Values.federator.securityContext | nindent 12 }}
+          image: "{{ .Values.federator.image.repository }}:{{ .Values.federator.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.federator.image.pullPolicy }}
+          ports:
+            - name: api
+              containerPort: {{ .Values.federator.service.ports.api.containerPort }}
+              protocol: {{ .Values.federator.service.ports.api.protocol }}
+          resources:
+            {{- toYaml .Values.federator.resources | nindent 12 }}
+          {{- with .Values.federator.envVars }}
+          env:
+            - name: APP_ENV
+              value: {{ .appEnv | quote }}
+            - name: APP_PORT
+              value: {{ .appPort | quote }}
+            - name: IS_ENTRYPOINT
+              value: {{ .isEntrypoint | quote }}
+            {{- with .domain }}
+            - name: DOMAIN_NAME
+              value: {{ .name | quote }}
+            - name: DOMAIN_DESCRIPTION
+              value: {{ .description | quote }}
+            - name: DOMAIN_PUBLIC_URL
+              value: {{ .publicUrl | quote }}
+            - name: DOMAIN_OWNER
+              value: {{ .owner | quote }}
+            - name: DOMAIN_CB_URL
+              value: {{ .cbUrl | quote }}
+            {{- if eq .cbHealthcheckMode "socket" }}
+            - name: DOMAIN_FEDERATOR_URL
+              value: {{ .federatorUrl | quote }}
+            {{- end }}
+            {{- end }}
+            - name: CB_HEALTH_CHECK_MODE
+              value: {{ .cbHealthcheckMode | quote }}
+            {{- if eq .cbHealthcheckMode "socket" }}
+            - name: DOMAIN_CB_HEALTH_URL
+              value: {{ .cbHealthUrl | quote }}
+            {{- end }}
+            - name: PEER_FEDERATOR_URL
+              value: {{ .peerFederatorUrl | quote }}
+            - name: TLS_CERTIFICATE_VALIDATION
+              value: {{ .tlsCertificateValidation | quote }}
+            {{- with .cbToken }}
+            - name: CB_TOKEN_MODE
+              value: {{ .mode | quote }}
+            {{- if eq .mode "shim" }}
+            - name: AERIOS_SHIM_URL
+              value: {{ .aeriosShimUrl | quote }}
+            {{- else if eq .mode "keycloak" }}
+            - name: CB_OAUTH_CLIENT_ID
+              value: {{ .oAuthClientId | quote }}
+            - name: CB_OAUTH_CLIENT_SECRET
+              value: {{ .oAuthClientSecret | quote }}
+            - name: KEYCLOAK_URL
+              value: {{ .keycloakUrl | quote }}
+            - name: KEYCLOAK_REALM
+              value: {{ .keycloakRealm | quote }}
+            {{- end }}
+            {{- end }}
+          {{- end }}

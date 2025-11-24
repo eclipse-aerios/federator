@@ -1,7 +1,7 @@
 services:
   federator:
     container_name: federator
-    image: <aerios-container-registry>/federator:1.1.0
+    image: eclipseaerios/federator:1.1.0
     ports:
       - 8050:8050
     environment:

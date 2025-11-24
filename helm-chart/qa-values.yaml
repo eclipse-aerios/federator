@@ -1,0 +1,67 @@
+# Default values for the application.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# String to partially override application.fullname template (will maintain the release name).
+nameOverride: ""
+# String to fully override application.fullname template.
+fullnameOverride: ""
+# Deploy all the components in specific K8s node(s).
+chartNodeSelector: {}
+
+# Component federator values.
+federator:
+  tier: external
+  replicaCount: 1
+
+  # Configuration of the container image.
+  imagePullSecrets: []
+  image:
+    repository: eclipseaerios/federator
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+    pullPolicy: IfNotPresent
+  # Configuration of the service: type and ports.
+  service:
+    type: NodePort
+    ports:
+      api:
+        port: 8050
+        targetPort: 8050
+        containerPort: 8050
+        nodePort: ""
+        protocol: TCP
+
+  resources: {}
+  autoscaling:
+    enabled: false
+  podSecurityContext: {}
+  securityContext: {}
+    
+  envVars:
+    appEnv: production
+    appPort: 8050
+    isEntrypoint: false
+    domain:
+      name: Domain01
+      description: This is a new domain
+      publicUrl: https://domain.aerios-project.eu
+      owner: UPV
+      cbUrl: http://orion-ld-broker.default.svc.cluster.local:1026
+      cbHealthUrl: http://orion-ld-broker.default.svc.cluster.local:1027
+      federatorUrl: ""
+    cbHealthcheckMode: endpoint
+    tlsCertificateValidation: false
+    peerFederatorUrl: https://other-domain.aerios-project.eu/federator
+    cbToken:
+      mode: shim
+      aeriosShimUrl: http://aerios-k8s-shim-service.default.svc.cluster.local:8085
+      oAuthClientId: ContextBroker
+      oAuthClientSecret: ""
+      keycloakUrl: https://keycloak.cf-mvp-domain.aerios-project.eu
+      keycloakRealm: keycloack-openldap
+
+  # Configure this parameters to deploy the component in specific K8s node(s).
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

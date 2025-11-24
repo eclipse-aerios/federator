@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "federator.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "federator.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.federator.service.type }}
+  ports:
+    - name: api
+      port: {{ .Values.federator.service.ports.api.port }}
+      targetPort: {{ .Values.federator.service.ports.api.targetPort }}
+      protocol: {{ .Values.federator.service.ports.api.protocol }}
+      {{- if and (or (eq .Values.federator.service.type "NodePort") (eq .Values.federator.service.type "LoadBalancer")) (not (empty .Values.federator.service.ports.api.nodePort)) }}
+      nodePort: {{ .Values.federator.service.ports.api.nodePort }}
+      {{- end }}
+  selector:
+    {{- include "federator.selectorLabels" . | nindent 4 }}
