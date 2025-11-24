@@ -58,8 +58,8 @@ federator:
       aeriosShimUrl: http://aerios-k8s-shim-service.default.svc.cluster.local:8085
       oAuthClientId: ContextBroker
       oAuthClientSecret: ""
-      keycloakUrl: https://keycloak.cf-mvp-domain.aerios-project.eu
-      keycloakRealm: keycloack-openldap
+      keycloakUrl: https://keycloak.aerios-project.eu
+      keycloakRealm: keycloak-realm
 
   # Configure this parameters to deploy the component in specific K8s node(s).
   nodeSelector: {}
