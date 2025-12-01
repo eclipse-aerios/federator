@@ -28,5 +28,7 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+examples
+helm-chart
 LICENSE
 README.md
