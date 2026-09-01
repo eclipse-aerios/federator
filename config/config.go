@@ -126,8 +126,8 @@ func LoadEnvVars() {
 
 	_, isTlsValPresent := os.LookupEnv("TLS_CERTIFICATE_VALIDATION")
 	if !isTlsValPresent {
-		log.Println("TLS_CERTIFICATE_VALIDATION env var not present, setting to false")
-		TLS_CERTIFICATE_VALIDATION = false
+		log.Println("TLS_CERTIFICATE_VALIDATION env var not present, setting to true")
+		TLS_CERTIFICATE_VALIDATION = true
 	} else {
 		TLS_CERTIFICATE_VALIDATION, err = strconv.ParseBool(os.Getenv("TLS_CERTIFICATE_VALIDATION"))
 		if err != nil {
