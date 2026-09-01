@@ -188,3 +188,40 @@ func NewBenchmarkCSR(newDomain *NewDomain) ContextSourceRegistration {
 		AeriosDomainFederation: true,
 	}
 }
+
+func NewStateManagerCSR(newDomain *NewDomain) ContextSourceRegistration {
+	return ContextSourceRegistration{
+		Id:   "urn:aerios:federation:" + strings.ToLower(newDomain.Name) + ":state-manager",
+		Type: "ContextSourceRegistration",
+		Mode: "inclusive",
+		Information: []information{
+			{
+				Entities: []informationEntities{
+					{
+						Type: "ServiceLifecycle",
+					},
+				},
+			},
+		},
+		ContextSourceInfo: []KeyValue{
+			{
+				Key:   "Authorization",
+				Value: NGSILD_PREFIX + "request",
+			},
+		},
+		Operations: []string{
+			"retrieveOps",
+			"updateOps",
+			"deleteEntity",
+			"deleteAttrs",
+		},
+		HostAlias: newDomain.BrokerId,
+		Endpoint:  newDomain.PublicUrl + "/orionld", // Add /orionld to be aligned with current KrakenD config
+		// Endpoint: newDomain.PublicUrl,
+		Management: CSRManagement{
+			LocalOnly: true,
+		},
+		AeriosDomain:           newDomain.Name,
+		AeriosDomainFederation: true,
+	}
+}

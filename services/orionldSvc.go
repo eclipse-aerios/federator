@@ -159,8 +159,9 @@ func (s *OrionldSvc) GenerateContextSourceRegistrations(newDomain *models.NewDom
 	organizationsCrs := models.NewOrganizationCSR(newDomain)
 	servicesCsr := models.NewServicesCSR(newDomain)
 	benchmarkCsr := models.NewBenchmarkCSR(newDomain)
+	stateManagerCsr := models.NewStateManagerCSR(newDomain)
 
-	registrations = append(registrations, infracrs, organizationsCrs, servicesCsr, benchmarkCsr)
+	registrations = append(registrations, infracrs, organizationsCrs, servicesCsr, benchmarkCsr, stateManagerCsr)
 	return
 }
 

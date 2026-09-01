@@ -23,7 +23,7 @@ federator:
     pullPolicy: IfNotPresent
   # Configuration of the service: type and ports.
   service:
-    type: NodePort
+    type: ClusterIP
     ports:
       api:
         port: 8050
@@ -51,7 +51,7 @@ federator:
       cbHealthUrl: http://orion-ld-broker.default.svc.cluster.local:1027
       federatorUrl: ""
     cbHealthcheckMode: endpoint
-    tlsCertificateValidation: false
+    tlsCertificateValidation: true
     peerFederatorUrl: https://other-domain.aerios-project.eu/federator
     cbToken:
       mode: shim
