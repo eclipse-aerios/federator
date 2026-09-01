@@ -2,8 +2,8 @@ services:
   federator:
     container_name: federator
     image: eclipseaerios/federator:1.1.0
-    ports:
-      - 8050:8050
+    # ports:
+    #   - 8050:8050
     environment:
       - APP_ENV=production
       - APP_PORT=8050

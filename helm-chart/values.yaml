@@ -23,7 +23,7 @@ federator:
     pullPolicy: IfNotPresent
   # Configuration of the service: type and ports.
   service:
-    type: NodePort
+    type: ClusterIP
     ports:
       api:
         port: 8050
